@@ -4,6 +4,7 @@
 #include <thread>
 #include <iostream>
 #include <chrono>
+#include <string>
 
 using namespace std ;
 
@@ -47,6 +48,19 @@ void tst_lkspin()
 // ////////////////////////////////////
 int main(int ac, char** av)
 {
+   //1. find which ones implemented lock-free for given arch
+   cerr << "a_bool lkfree? " << islkfree<bool>()() << endl ;
+   cerr << "a_int  lkfree? " << islkfree<int>()()  << endl ;
+   cerr << "a_long lkfree? " << islkfree<long>()() << endl ;
+   cerr << "a_char lkfree? " << islkfree<char>()() << endl ;
+   cerr << "a_char* lkfree? " << islkfree<char*>()() << endl ;
+
+   // this call for example is compile error --- one of the
+   //      atomic's constraints is to be trivially copyable
+   //      which std::string is definitely not !
+   //cerr << "a_string lkfree? " << lkfree<std::string>()() << endl ;
+
+   //2. spin-lock via atomic_flag
    tst_lkspin() ;
 }
 
