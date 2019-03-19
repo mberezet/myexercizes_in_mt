@@ -13,7 +13,7 @@ using namespace std ;
 //     have inevitable dead-lock, as it calls t1,t2 executor
 //     params in reverse order to each other !
 //     But mx's are not locked initially, and std::lock()
-//     is an ATOMIX ops --- so it 'collpases' 2 mx in 'one'
+//     is an ATOMIX ops --- so it 'collpases' 2 locks in 'one'
 //
 struct elem_t {
   int x{9} ;
