@@ -15,6 +15,11 @@ using namespace std ;
 //     But mx's are not locked initially, and std::lock()
 //     is an ATOMIX ops --- so it 'collpases' 2 mx in 'one'
 //
+//     BUT!  lock() or try_lock() free functions magic is achieved
+//     by back-off-retry --- which can be highly non-deterministic
+//     latency-wise, on top of high latency of contended mx, due to
+//     possible kernel calls. Not for HFT or other sensitive stuff.
+//
 struct elem_t {
   int x{9} ;
   mutex m ;
@@ -27,6 +32,7 @@ void t_main(elem_t& e1, elem_t& e2) {
   unique_lock<mutex> lo_2(e2.m, defer_lock) ;
 
   std::lock(lo_1, lo_2) ;    // this is ATOMIC lock of both locks !!!
+  cerr << "thread= " << this_thread::get_id()  << endl ;
   ++e1.x ;   ++e2.x ;
 }
 
