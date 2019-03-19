@@ -31,8 +31,9 @@ int main(int ac, char** av)
 
 	for (int x=0 ; x< executors.size(); ++x)
    	{
-	     thread t(&Executor::parall_calc, &executors[x], x) ;
-		 ths[x] = move(t) ;
+	     thread t(&Executor::parall_calc, &executors[x], /*binding part*/
+		      x /*param passing to executor*/) ;
+              ths[x] = move(t) ;
 	}
 
 	for (int x=0 ; x< executors.size(); ++x)
