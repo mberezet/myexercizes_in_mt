@@ -6,9 +6,9 @@
 // std::call_once is @#^$%  buggy !!!
 // It uses incorrect object internally [unique_lock instead of direct mutex] and
 // throws !!! 
-// And that is for long time now. fuck STL !!!!
+// And that is for long time now. muck STL !!!!
 // Use original pthread library -- tested, working, no c++ overcomplicated
-//     and implicit bullshit ! [ and yes --- pthreads does have call once facility].
+//     and implicit BS! [ and yes --- pthreads does have call once facility].
 //
 template <typename T>
 class ThSngl
