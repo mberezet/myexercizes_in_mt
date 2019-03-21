@@ -2,6 +2,7 @@
 #include <mutex>
 #include <iostream>
 #include <chrono>
+#include <vector>
 
 using namespace std ;
 
@@ -25,7 +26,6 @@ struct elem_t {
   mutex m ;
 } ;
 
-///////////////////////////////////////////////////
 void t_main1(elem_t& e1, elem_t& e2) {
   unique_lock<mutex> lo_1(e1.m, defer_lock) ;
   this_thread::sleep_for(chrono::milliseconds(4)) ; 
@@ -36,7 +36,8 @@ void t_main1(elem_t& e1, elem_t& e2) {
   ++e1.x ;   ++e2.x ;
 }
 
-//Ex 2: scoped_lock (starting C++17)
+////////////////////////////////////////////////////////
+//   Ex 2: scoped_lock (starting C++17)
 //   this is object similar to above example, but more brief,
 //   no need 'zavodit' locks and then atomically lck them -
 //   its all can be done with scoped_lock object
@@ -47,6 +48,20 @@ void t_main2(elem_t& e1, elem_t& e2) {
   cerr << "thread= " << this_thread::get_id()  << endl ;
   e1.x=999 ;   e2.x = 1000 ;
 }
+
+////////////////////////////////////////////////////////
+//   Ex 3: prallel Fib
+int cnt=1 ; int b=1 ; int c=1;
+mutex mcnt ;
+mutex minc ;
+constexpr int TPOOLSZ = 10;   //fib of that...
+
+void fibinc() {
+  scoped_lock<mutex, mutex> GG(mcnt,minc) ;
+  ++cnt ;
+  b = std::exchange(c, b+c) ;
+}
+
 ///////////////////////////////////////////////////
 int main() {
 
@@ -70,4 +85,16 @@ int main() {
   t3.join(); t4.join() ;
 
   cerr << "e_nxt.x = " << e_nxt.x << ";" << "e_prev.x = " << e_prev.x << endl ;          
+
+  //test threaded fibonacci
+  std::vector<thread> tpool ;
+  tpool.reserve(TPOOLSZ) ;
+
+  for (auto x=1 ; x <= TPOOLSZ ; ++x)
+      tpool.emplace_back( thread(fibinc) ) ;
+
+  for ( auto& t : tpool)
+      t.join() ;
+
+  cerr << "Fib(" << tpool.size() << ") = " << c << endl ;
 }
