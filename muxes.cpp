@@ -13,9 +13,9 @@ using namespace std ;
 //     have inevitable dead-lock, as it calls t1,t2 executor
 //     params in reverse order to each other !
 //     But mx's are not locked initially, and std::lock()
-//     is an ATOMIX ops --- so it 'collpases' 2 locks in 'one'
+//     is an ATOMIC ops --- so it 'collpases' 2 locks in 'one'
 //
-//     BUT!  lock() or try_lock() free functions magic is achieved
+//     BUT!  lock() or try_lock() free function's magic is achieved
 //     by back-off-retry --- which can be highly non-deterministic
 //     latency-wise, on top of high latency of contended mx, due to
 //     possible kernel calls. Not for HFT or other sensitive stuff.
@@ -26,33 +26,48 @@ struct elem_t {
 } ;
 
 ///////////////////////////////////////////////////
-void t_main(elem_t& e1, elem_t& e2) {
+void t_main1(elem_t& e1, elem_t& e2) {
   unique_lock<mutex> lo_1(e1.m, defer_lock) ;
   this_thread::sleep_for(chrono::milliseconds(4)) ; 
   unique_lock<mutex> lo_2(e2.m, defer_lock) ;
 
-  std::lock(lo_1, lo_2) ;    // this is ATOMIC lock of both locks !!!
+  std::lock(lo_1, lo_2) ;    // this is ATOMIC lock of both locks !!! 
   cerr << "thread= " << this_thread::get_id()  << endl ;
   ++e1.x ;   ++e2.x ;
 }
 
+//Ex 2: scoped_lock (starting C++17)
+//   this is object similar to above example, but more brief,
+//   no need 'zavodit' locks and then atomically lck them -
+//   its all can be done with scoped_lock object
+//   Same about performance as above.
+void t_main2(elem_t& e1, elem_t& e2) {
+  std::scoped_lock(e1.m, e2.m) ;                   // this is ATOMIC lock of both mux's !!!
+  this_thread::sleep_for(chrono::milliseconds(4)) ; 
+  cerr << "thread= " << this_thread::get_id()  << endl ;
+  e1.x=999 ;   e2.x = 1000 ;
+}
 ///////////////////////////////////////////////////
 int main() {
 
   elem_t e_nxt ;
   elem_t e_prev ;
 
-  // old way ... NB! pass std::ref 
-  //             Passing as val will generate compile error !
-  //thread t1( t_main, std::ref(e_nxt), std::ref(e_prev) ) ;
-  //thread t2( t_main, std::ref(e_prev), std::ref(e_nxt) ) ;
+  // old way ... NB! pass std::ref. Passing as val will generate compile error !
+  //thread t1( t_main1, std::ref(e_nxt), std::ref(e_prev) ) ;
+  //thread t2( t_main1, std::ref(e_prev), std::ref(e_nxt) ) ;
 
-  // modern way ... NB! capture refrence.
-  //             Any other will genrate compile error !
-  thread t1( [&]{t_main(e_nxt, e_prev);} ) ;
-  thread t2( [&]{t_main(e_prev, e_nxt);} ) ;
-
+  // modern way ... NB! capture refrence.  Any other will genrate compile error !
+  thread t1( [&]() { t_main1(e_nxt, e_prev); } ) ;
+  thread t2( [&]() { t_main1(e_prev, e_nxt); } ) ;
   t1.join(); t2.join() ;
+  cerr << "e_nxt.x = " << e_nxt.x << ";" << "e_prev.x = " << e_prev.x << endl ;          
+
+  // test scoped_lock
+  // NB this must be gcc with -std=c++17 if default is c++14
+  thread t3( [&]() { t_main2(e_nxt, e_prev); } ) ;
+  thread t4( [&]() { t_main2(e_prev, e_nxt); } ) ;
+  t3.join(); t4.join() ;
 
   cerr << "e_nxt.x = " << e_nxt.x << ";" << "e_prev.x = " << e_prev.x << endl ;          
 }
