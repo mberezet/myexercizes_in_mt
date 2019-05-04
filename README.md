@@ -1,6 +1,6 @@
 # myexercizes_in_mt
 
-compile with -pthread  opton
+compile with -lpthread ld opton
 
 ////////////////////////////////////////////////////////
 // install g++ 7 to ubuntu [c++17 support by deflt]
