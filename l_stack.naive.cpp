@@ -23,6 +23,10 @@ template<typename T> class lf_stack {
   std::atomic<Node*> hd_ ;           //stack hd, ptr is trivial type
 
 public:
+  lf_stack() = default ;
+  lf_stack(const lf_stack&)            = delete ;
+  lf_stack& operator=(const lf_stack&) = delete ;
+
   //////////////////////////////////////
   void push(const T& data)
   {
@@ -31,14 +35,14 @@ public:
     while( !hd_.cass(nnode->nx /*expected*/ ,nnode /*setto*/) );
   } 
   ////////////////////////////////////
-  bool pop(T& data)
+  bool pop(T& reslt)
   {
      Node* n2pop = hd_.load() ;
      if (!n2pop) return false ;
      while( n2pop && !hd_.cass(n2pop /*expected*/ ,n2pop->nx /*setto*/) ) ;    
+
+     reslt = n2pop->data ;
+     return true ;
   }
 
-  lf_stack() = default ;
-  lf_stack(const lf_stack&)            = delete ;
-  lf_stack& operator=(const lf_stack&) = delete ;
 };
