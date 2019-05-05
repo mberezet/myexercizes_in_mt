@@ -16,22 +16,29 @@ template<typename T> class lf_stack {
     Node* nx   ;
     T     data ;
 
-    Node(const T& dat): data(dat)
-    {}
+    Node(const T& dat): data(dat), nx(nullptr)
+    { }
   } ;
 
-  std::atomic<Node*> hd_ ;      //stack hd, ptr is trivial type
+  std::atomic<Node*> hd_ ;           //stack hd, ptr is trivial type
 
 public:
-  void push(const T& data) {
+  //////////////////////////////////////
+  void push(const T& data)
+  {
     Node* nnode = new Node(data) ;
-
-    nnode->nx = hd_.load() ;    //initialization, cas can change that
-    while( !hd_.cass(nnode->nx/*expected*/ ,nnode/*desired*/) );
+    nnode->nx = hd_.load() ;          //initialization, cas can change that
+    while( !hd_.cass(nnode->nx /*expected*/ ,nnode /*setto*/) );
   } 
+  ////////////////////////////////////
+  bool pop(T& data)
+  {
+     Node* n2pop = hd_.load() ;
+     if (!n2pop) return false ;
+     while( n2pop && !hd_.cass(n2pop /*expected*/ ,n2pop->nx /*setto*/) ) ;    
+  }
 
   lf_stack() = default ;
-
   lf_stack(const lf_stack&)            = delete ;
   lf_stack& operator=(const lf_stack&) = delete ;
 };
