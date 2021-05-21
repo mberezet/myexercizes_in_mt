@@ -34,8 +34,8 @@ int main()
   promise<double> pcalc1 ; future<double> f1 = pcalc1.get_future();
   promise<double> pcalc2 ; future<double> f2 = pcalc2.get_future();
 
-  thread t1(ddiv, move(pcalc1), 1.1, 2.2) ;
-  thread t2(dmul, move(pcalc2), 1.1, 2.2) ;
+  thread t1(ddiv, std::move(pcalc1), 1.1, 2.2) ;
+  thread t2(dmul, std::move(pcalc2), 1.1, 2.2) ;
   cerr << "waiting for promises" << endl ;
   cerr << "M=" << f2.get() << "; D=" << f1.get() << endl ;
   t1.join() ;

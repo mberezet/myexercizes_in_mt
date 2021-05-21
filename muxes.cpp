@@ -21,6 +21,8 @@ using namespace std ;
 //     latency-wise, on top of high latency of contended mx, due to
 //     possible kernel calls. Not for HFT or other sensitive stuff.
 //
+//     also:  std::lock is RAII !
+//
 struct elem_t {
   int x{9} ;
   mutex m ;
@@ -42,6 +44,9 @@ void t_main1(elem_t& e1, elem_t& e2) {
 //   no need 'zavodit' locks and then atomically lck them -
 //   its all can be done with scoped_lock object
 //   Same about performance as above.
+//
+//   also:  std::scoped_lock is RAII !
+//
 void t_main2(elem_t& e1, elem_t& e2) {
   std::scoped_lock(e1.m, e2.m) ;                   // this is ATOMIC lock of both mux's !!!
   this_thread::sleep_for(chrono::milliseconds(4)) ; 
@@ -73,8 +78,8 @@ int main() {
   //thread t2( t_main1, std::ref(e_prev), std::ref(e_nxt) ) ;
 
   // modern way ... NB! capture refrence.  Any other will genrate compile error !
-  thread t1( [&]() { t_main1(e_nxt, e_prev); } ) ;
-  thread t2( [&]() { t_main1(e_prev, e_nxt); } ) ;
+  thread t1( [&]() { t_main1(e_nxt,  e_prev); } ) ;
+  thread t2( [&]() { t_main1(e_prev, e_nxt);  } ) ;
   t1.join(); t2.join() ;
   cerr << "e_nxt.x = " << e_nxt.x << ";" << "e_prev.x = " << e_prev.x << endl ;          
 
