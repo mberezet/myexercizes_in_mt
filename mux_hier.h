@@ -67,7 +67,7 @@ public:
     th_hilevel_curr = th_hilevel_prev_ ;
   }
 
-  unsigned long getlevel()
+  unsigned long getlevel() const
     {return my_hier_ ;}
 
 private:
