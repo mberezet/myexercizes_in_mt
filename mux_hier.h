@@ -7,7 +7,7 @@
 //////////////////////////////////////////////////////////
 //  implementation of the hierarchical mutex.
 //  It guarantees that with right settings of the
-//     locks-level the hierarchy of locks used protects from
+//     locks-level the hierarchy of locks used is free from
 //     dead-locks.
 //  Operations:  you instantiate mux_hier w fixed hierarchy number (on construction).
 //               Hier - from low-level(low number) -> high-level(higher number).
