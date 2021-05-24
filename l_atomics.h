@@ -3,7 +3,6 @@
 
 ///////////////////////////////////////////////////////////////////////
 //  NB!  each atomic op supports (optional) memory-ord arg:
-//
 // std::memory_order_seq_cst  - full-seq ord (default, most restrictive)
 // std::memory_order_relaxed
 // std::memory_order_consume
