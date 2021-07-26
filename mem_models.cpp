@@ -38,10 +38,8 @@ void dispatch()
 
 ////////////////////////////////////////////
 int main() {
-  std::thread tc(consumer) ;	
   std::thread td(dispatch) ;	
-
-  sleep(5) ;
+  std::thread tc(consumer) ;	
   std::thread tp(producer) ;	
 
   tc.join() ;
