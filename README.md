@@ -1,8 +1,10 @@
 # myexercizes_in_mt
 
 //compile with -pthread compile opton
-// install g++ 7 to ubuntu [c++17 support by deflt]
+//   g++ -std=c++17 [-g] [-On] [-pthread]  [-lpthread | -lm]
 
+
+// install g++ 7 to ubuntu [c++17 support by deflt]
 sudo apt-get update -y && \
 sudo apt-get upgrade -y && \
 sudo apt-get dist-upgrade -y && \
