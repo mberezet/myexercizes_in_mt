@@ -125,7 +125,7 @@ public:
         if ( lkowner_ == std::this_thread::get_id() ) 
         {
             if ( 0 == --cnt_ ) {
-               lkowner_ = std::thread::id() ;
+               lkowner_ = std::thread::id() ;            // reinitialize with undefined tid
                lk_.store(0, std::memory_order_release) ;
             }
         }
