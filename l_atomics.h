@@ -74,4 +74,9 @@ public:
     {
         lk_.store(0, std::memory_order_release) ;
     }
+ };
+                
+////// Lock spin based on atomic<int> //////////////////
+class lkspinwt_recurs
+{
 } ;
