@@ -1,5 +1,6 @@
 #pragma once
 #include <atomic>
+#include <thread>
 
 ///////////////////////////////////////////////////////////////////////
 //  NB!  each atomic op supports (optional) memory-ord arg:
@@ -76,7 +77,60 @@ public:
     }
  };
                 
-////// Lock spin based on atomic<int> //////////////////
+////// Recursive Lock spin based on atomic<int> //////////////////
 class lkspinwt_recurs
 {
+ protected:    
+    alignas(64) std::atomic<int> lk_ ;       // 0- free; 1-locked
+    
+    // we dont need following to be atomic -- their modification
+    //    all done when we already atomically ackquiered lk_
+    std::uint64_t                cnt_ ;
+    std::tread::id               lkowner_ ;  // thrd owing the lk_
+    
+public:
+    lkspinwt_recurs() : lk_(0), cnt_(0)
+    { }                               //atomic ini is atomic   
+
+    void lock()
+    {
+        while ( ! tryloclk() )        //eagrly try to lock
+        {                             //   failed..pause-loop till get back 0 (meaning im-currently-free)
+           while ( lk_.load(std::memory_order_acquire) )
+           { pause(); } 
+        }
+    }
+    
+    bool trylock()
+    { 
+        if ( lkowner_ == std::this_thread::get_id() ) 
+        {
+            ++cnt_ ;
+            return true ;
+        }
+        else
+        {
+          if ( 0 == lk_.exchange(1, std::memory_order_seq_cst) )
+          {
+              lkowner_ = std::this_thread::get_id() ;
+              ++cnt_ ;
+              return true ;
+          }
+        }
+        return false ;
+    }
+                
+    void unlock()
+    {
+        if ( lkowner_ == std::this_thread::get_id() ) 
+        {
+            if ( 0 == --cnt_ ) {
+               lkowner_ = std::thread::id() ;
+               lk_.store(0, std::memory_order_release) ;
+            }
+        }
+        //if we got here its technically caller's error: 
+        //   thread trying to unlock lk_ it does not own.
+        //   make it nop for now
+    }
 } ;
