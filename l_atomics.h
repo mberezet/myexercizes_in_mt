@@ -1,6 +1,7 @@
 #pragma once
 #include <atomic>
 #include <thread>
+#include <cstdint>
 
 ///////////////////////////////////////////////////////////////////////
 //  NB!  each atomic op supports (optional) memory-ord arg:
